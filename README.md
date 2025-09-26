@@ -717,7 +717,7 @@ This project was developed as part of an interview assignment demonstrating:
 - Comprehensive testing strategies
 - Clean code practices and documentation
 
-**Author**: [Your Name]  
+**Author**: Narendra Sarkar 
 **Created**: September 2025  
 **Java Version**: 17+  
 **Build Tool**: Maven 3.6+
