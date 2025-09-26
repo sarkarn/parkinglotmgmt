@@ -4,6 +4,7 @@ A comprehensive object-oriented parking lot management system built with Java 17
 
 ## Table of Contents
 - [Setup Instructions](#setup-instructions)
+- [Architecture Overview](#architecture-overview)
 - [Design and Architecture](#design-and-architecture)
 - [Requirements Assumptions](#requirements-assumptions)
 - [Limitations and Future Extensions](#limitations-and-future-extensions)
@@ -558,6 +559,130 @@ mvn test -Dtest=ParkingLotTest -DforkCount=1 -DreuseForks=false
 # Generate test coverage report (if configured)
 mvn jacoco:report
 ```
+
+## Architecture Overview
+
+The system architecture is comprehensively documented through multiple UML diagrams located in the `/design` folder. These diagrams provide different perspectives on the system's structure and behavior:
+
+### 📊 Architecture Diagrams
+
+#### 1. **Class Diagram** (`design/parkinglotmgmt-class.png`)
+![Class Diagram](design/parkinglotmgmt-class.png)
+
+**Purpose**: Shows the static structure of the system with all classes, interfaces, and their relationships.
+
+**Key Highlights**:
+- **Strategy Pattern Implementation**: `ParkingStrategy` interface with concrete strategies
+- **Domain Model**: Clear separation of `model` package with entities like `ParkingSpace`, `Vehicle`, `ParkingResult`
+- **Factory Pattern**: `ParkingStrategyFactory` for strategy management
+- **Relationships**: Composition, inheritance, and dependency relationships
+- **Data Structures**: Two-way mapping between vehicles and spaces for O(1) lookups
+
+#### 2. **Sequence Diagram** (`design/parkinglotmgmt-sequence.png`)
+![Sequence Diagram](design/parkinglotmgmt-sequence.png)
+
+**Purpose**: Illustrates the dynamic interaction flow for parking vehicle operations.
+
+**Key Flow**:
+1. Client initiates `parkVehicle()` request
+2. Input validation and duplicate check
+3. Strategy selection via `ParkingStrategyFactory`
+4. Vehicle-specific allocation logic execution
+5. Space occupation and mapping updates
+6. Result return with success/failure status
+
+**Demonstrates**:
+- Strategy pattern in action
+- Error handling flows
+- State management operations
+- Inter-object communication patterns
+
+#### 3. **Use Case Diagram** (`design/parkinglotmgmt-usecase.png`)
+![Use Case Diagram](design/parkinglotmgmt-usecase.png)
+
+**Purpose**: Defines system functionality from user perspective with actors and their interactions.
+
+**Actors**:
+- **Vehicle Owner**: Parks/removes vehicles, checks location
+- **Parking Lot Manager**: Manages operations, monitors status
+- **System Administrator**: Initializes system, views analytics
+
+**Use Cases**:
+- Core operations: Park Vehicle, Remove Vehicle, Check Status
+- Vehicle-specific extensions: Motorcycle/Car/Van parking strategies
+- System operations: Lot initialization, space management
+
+#### 4. **Activity Diagram** (`design/parkinglotmgmt-activity.png`)
+![Activity Diagram](design/parkinglotmgmt-activity.png)
+
+**Purpose**: Shows the workflow and decision points in the parking process.
+
+**Process Flow**:
+- Input validation and preprocessing
+- Vehicle existence check
+- Strategy-based allocation decision tree
+- Space availability verification
+- Parallel space occupation and mapping updates
+- Result generation and return
+
+**Features**:
+- Decision diamonds for business logic
+- Fork/join for parallel operations
+- Clear error paths and handling
+
+#### 5. **Mind Map** (`design/parkinglotmgmt-mindmap.png`)
+![Mind Map](design/parkinglotmgmt-mindmap.png)
+
+**Purpose**: Provides a high-level conceptual overview of the entire system architecture.
+
+**Main Branches**:
+- **Core Components**: ParkingLot, models, enums
+- **Strategy Pattern**: Interface, implementations, factory
+- **Business Rules**: Vehicle types, space management, allocation logic
+- **System Operations**: CRUD operations, validation, tracking
+- **Technical Architecture**: Design patterns, testing, build system
+
+### 🎯 Architectural Decisions Visualized
+
+The diagrams collectively illustrate key architectural decisions:
+
+#### **Strategy Pattern Implementation**
+- **Class Diagram**: Shows interface hierarchy and factory pattern
+- **Sequence Diagram**: Demonstrates runtime strategy selection
+- **Activity Diagram**: Shows decision logic for different vehicle types
+
+#### **Data Management Architecture**
+- **Two-way mapping system** for efficient lookups
+- **Row-based organization** reflecting real-world structure
+- **Immutable result objects** for thread safety
+
+#### **Error Handling Strategy**
+- **Graceful degradation** without exceptions
+- **Meaningful error messages** at each failure point
+- **State consistency** maintenance during failures
+
+#### **Extensibility Design**
+- **Open/Closed Principle**: Easy to add new vehicle types
+- **Factory Pattern**: Centralized strategy management
+- **Clean interfaces**: Well-defined contracts between components
+
+### 🔄 System Interaction Patterns
+
+The diagrams reveal several interaction patterns:
+
+1. **Command Pattern Elements**: Operations encapsulated as method calls
+2. **Factory Method**: Strategy creation abstracted from business logic
+3. **State Management**: Consistent state updates across multiple data structures
+4. **Validation Chain**: Input validation at multiple levels
+
+### 📈 Scalability Considerations
+
+The architecture supports future enhancements:
+
+- **Horizontal Scaling**: Multi-lot management through composition
+- **Feature Extension**: New vehicle types via strategy implementation
+- **Integration Points**: Clean APIs for external system integration
+- **Monitoring Hooks**: Status reporting infrastructure for analytics
 
 ## Features
 
