@@ -1,0 +1,83 @@
+@startmindmap
+title Parking Lot Management System Architecture
+
+* Parking Lot\nManagement System
+** Core Components
+*** ParkingLot
+**** Main orchestrator class
+**** Manages space allocation
+**** Tracks vehicle assignments
+**** Provides system status
+*** Data Models
+**** Vehicle (ID, Type)
+**** ParkingSpace (ID, Type, Status)
+**** ParkingResult (Success, Message, Spaces)
+**** LotStatus (Comprehensive metrics)
+*** Enumerations
+**** VehicleType (MOTORCYCLE, CAR, VAN)
+**** SpaceType (COMPACT, REGULAR)
+
+** Strategy Pattern
+*** ParkingStrategy Interface
+**** Defines allocation contract
+**** Returns ParkingResult
+*** Concrete Strategies
+**** MotorcycleParkingStrategy
+**** CarParkingStrategy
+**** VanParkingStrategy
+*** Strategy Factory
+**** Manages strategy instances
+**** Returns appropriate strategy
+**** Supports extensibility
+
+** Business Rules
+*** Vehicle Types
+**** Motorcycle: 1 space (any type)
+**** Car: 1 space (compact preferred)
+**** Van: 3 consecutive spaces (regular preferred)
+*** Space Management
+**** Compact spaces for small vehicles
+**** Regular spaces for all vehicles
+**** Row-based organization
+**** Unique space identifiers
+*** Allocation Logic
+**** Prefer appropriate space types
+**** Ensure consecutive van spaces
+**** Track vehicle locations
+**** Prevent double parking
+
+** System Operations
+*** Parking Operations
+**** Park vehicle
+**** Remove vehicle
+**** Check vehicle location
+**** Get lot status
+*** Data Tracking
+**** Vehicle to spaces mapping
+**** Space to vehicle mapping
+**** Real-time occupancy
+**** Van space counting
+*** Validation
+**** Vehicle ID validation
+**** Space availability checks
+**** Business rule enforcement
+**** Error handling
+
+** Technical Architecture
+*** Design Patterns
+**** Strategy Pattern for allocation
+**** Factory Pattern for strategies
+**** Immutable result objects
+**** Encapsulation principles
+*** Testing Strategy
+**** Unit tests for all components
+**** Integration tests for workflows
+**** Edge case validation
+**** 40+ comprehensive test cases
+*** Build System
+**** Maven project structure
+**** Java 17 compatibility
+**** JUnit 5 testing framework
+**** Exec plugin for demo
+
+@endmindmap

@@ -1,6 +1,7 @@
 package com.example.parkinglot;
 
 import com.example.parkinglot.model.*;
+import com.example.parkinglot.strategy.*;
 import java.util.*;
 
 /**
@@ -45,7 +46,7 @@ public class ParkingLot {
     }
     
     /**
-     * Attempts to park a vehicle in the parking lot.
+     * Attempts to park a vehicle in the parking lot using the Strategy Pattern.
      * @param vehicleId Unique identifier for the vehicle
      * @param vehicleType Type of vehicle (MOTORCYCLE, CAR, VAN)
      * @return ParkingResult indicating success/failure and allocated spaces
@@ -65,61 +66,23 @@ public class ParkingLot {
             return ParkingResult.alreadyParked(vehicleToSpaces.get(vehicleId));
         }
         
-        switch (vehicleType) {
-            case MOTORCYCLE:
-                return parkMotorcycle(vehicleId);
-            case CAR:
-                return parkCar(vehicleId);
-            case VAN:
-                return parkVan(vehicleId);
-            default:
-                return ParkingResult.failure("Unknown vehicle type");
-        }
-    }
-    
-    private ParkingResult parkMotorcycle(String vehicleId) {
-        // Motorcycles can park in any available space (compact or regular)
-        for (List<ParkingSpace> row : rows) {
-            for (ParkingSpace space : row) {
-                if (!space.isOccupied()) {
+        // Use Strategy Pattern to get the appropriate allocation strategy
+        try {
+            ParkingStrategy strategy = ParkingStrategyFactory.getStrategy(vehicleType);
+            ParkingResult result = strategy.allocateSpaces(vehicleId, rows);
+            
+            // If allocation was successful, occupy the spaces
+            if (result.isSuccess()) {
+                for (String spaceId : result.getAllocatedSpaces()) {
+                    ParkingSpace space = findSpaceById(spaceId);
                     occupySpace(space, vehicleId);
-                    return ParkingResult.success(space.getIdentifier());
                 }
             }
+            
+            return result;
+        } catch (IllegalArgumentException e) {
+            return ParkingResult.failure("Unsupported vehicle type: " + vehicleType);
         }
-        return ParkingResult.failure("No available space for motorcycle");
-    }
-    
-    private ParkingResult parkCar(String vehicleId) {
-        // Cars can only park in regular spaces
-        for (List<ParkingSpace> row : rows) {
-            for (ParkingSpace space : row) {
-                if (!space.isOccupied() && space.getType() == SpaceType.REGULAR) {
-                    occupySpace(space, vehicleId);
-                    return ParkingResult.success(space.getIdentifier());
-                }
-            }
-        }
-        return ParkingResult.failure("No available regular space for car");
-    }
-    
-    private ParkingResult parkVan(String vehicleId) {
-        // Vans need two contiguous regular spaces in the same row
-        for (List<ParkingSpace> row : rows) {
-            for (int i = 0; i < row.size() - 1; i++) {
-                ParkingSpace space1 = row.get(i);
-                ParkingSpace space2 = row.get(i + 1);
-                
-                if (!space1.isOccupied() && !space2.isOccupied() &&
-                    space1.getType() == SpaceType.REGULAR && space2.getType() == SpaceType.REGULAR) {
-                    
-                    occupySpace(space1, vehicleId);
-                    occupySpace(space2, vehicleId);
-                    return ParkingResult.success(List.of(space1.getIdentifier(), space2.getIdentifier()));
-                }
-            }
-        }
-        return ParkingResult.failure("No two contiguous regular spaces available for van");
     }
     
     private void occupySpace(ParkingSpace space, String vehicleId) {
