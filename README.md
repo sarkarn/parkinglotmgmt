@@ -101,27 +101,30 @@ public class TruckParkingStrategy implements ParkingStrategy {
 
 **Implementation**: `ParkingResult` and `LotStatus` are immutable with static factory methods.
 
-### Architecture Layers
+### Architecture
+Currently, everything is under one layer. However, App.java functions could be moved in the presentation layer such as React application.
 
-#### 1. Presentation Layer (`App.java`)
+#### 1. Entry point to the application `App.java`)
 - Demonstrates system capabilities
 - Provides user interaction examples
 - Handles output formatting
 
-#### 2. Business Logic Layer (`ParkingLot.java`)
+
+
+#### 2. Business Logic (`ParkingLot.java`)
 - Core orchestration of parking operations
 - Delegates allocation to appropriate strategies
 - Manages vehicle-to-space mapping
 - Enforces business rules
 
-#### 3. Domain Model Layer (`model` package)
+#### 3. Domain Model (`model` package)
 - `ParkingSpace`: Represents individual parking spots
 - `Vehicle`: Represents parked vehicles
 - `ParkingResult`: Encapsulates operation results
 - `LotStatus`: Provides comprehensive status reporting
 - Enums: `VehicleType`, `SpaceType` for type safety
 
-#### 4. Strategy Layer (`strategy` package)
+#### 4. Strategy Patterns(`strategy` package)
 - Contains all allocation strategies
 - Isolated business logic for each vehicle type
 - Factory for strategy management
