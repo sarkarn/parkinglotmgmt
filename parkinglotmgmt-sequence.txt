@@ -1,0 +1,69 @@
+@startuml
+title Parking Vehicle Operation - Sequence Diagram
+
+participant Client
+participant ParkingLot
+participant ParkingStrategyFactory
+participant ParkingStrategy
+participant ParkingSpace
+participant ParkingResult
+
+Client -> ParkingLot: parkVehicle(vehicleId, vehicleType)
+activate ParkingLot
+
+note right of ParkingLot: Validate input parameters
+ParkingLot -> ParkingLot: Check if vehicleId is null/empty
+ParkingLot -> ParkingLot: Check if vehicleType is null
+
+alt Vehicle already parked
+  ParkingLot -> ParkingLot: vehicleToSpaces.containsKey(vehicleId)
+  ParkingLot -> ParkingResult: alreadyParked(existingSpaces)
+  ParkingResult -> Client: Return existing allocation result
+else Vehicle not parked
+  ParkingLot -> ParkingStrategyFactory: getStrategy(vehicleType)
+  activate ParkingStrategyFactory
+  
+  note right of ParkingStrategyFactory: Factory returns appropriate strategy
+  ParkingStrategyFactory -> ParkingStrategy: Return strategy instance
+  deactivate ParkingStrategyFactory
+  
+  ParkingLot -> ParkingStrategy: allocateSpaces(vehicleId, rows)
+  activate ParkingStrategy
+  
+  loop For each row in parking lot
+    ParkingStrategy -> ParkingSpace: Check space availability
+    activate ParkingSpace
+    ParkingSpace -> ParkingStrategy: Return availability status
+    deactivate ParkingSpace
+  end
+  
+  alt Suitable spaces found
+    note right of ParkingStrategy: Vehicle-specific allocation logic
+    ParkingStrategy -> ParkingResult: success(allocatedSpaces)
+  else No suitable spaces
+    ParkingStrategy -> ParkingResult: failure(reason)
+  end
+  
+  ParkingResult -> ParkingStrategy: Return result
+  ParkingStrategy -> ParkingLot: Return allocation result
+  deactivate ParkingStrategy
+  
+  alt Allocation successful
+    loop For each allocated space
+      ParkingLot -> ParkingSpace: findSpaceById(spaceId)
+      activate ParkingSpace
+      ParkingLot -> ParkingSpace: occupy(vehicleId)
+      ParkingSpace -> ParkingLot: Space occupied
+      deactivate ParkingSpace
+      
+      ParkingLot -> ParkingLot: Update spaceToVehicle map
+      ParkingLot -> ParkingLot: Update vehicleToSpaces map
+    end
+  end
+  
+  ParkingLot -> Client: Return final result
+end
+
+deactivate ParkingLot
+
+@enduml

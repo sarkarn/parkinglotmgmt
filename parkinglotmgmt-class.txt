@@ -1,0 +1,138 @@
+@startuml
+title Parking Lot Management System - Class Diagram
+
+' Main Classes
+class ParkingLot {
+  - rows: List<List<ParkingSpace>>
+  - vehicleToSpaces: Map<String, List<String>>
+  - spaceToVehicle: Map<String, String>
+  + ParkingLot(rowConfigurations: List<SpaceType[]>)
+  - initializeRows(rowConfigurations: List<SpaceType[]>): void
+  + parkVehicle(vehicleId: String, vehicleType: VehicleType): ParkingResult
+  - occupySpace(space: ParkingSpace, vehicleId: String): void
+  + removeVehicle(vehicleId: String): boolean
+  - findSpaceById(spaceId: String): ParkingSpace
+  + getLotStatus(): LotStatus
+  - countVanOccupiedSpaces(): int
+  + getVehicleSpaces(vehicleId: String): List<String>
+  + getRowSummaries(): List<String>
+}
+
+class ParkingSpace {
+  - identifier: String
+  - type: SpaceType
+  - occupiedBy: String
+  + ParkingSpace(identifier: String, type: SpaceType)
+  + getIdentifier(): String
+  + getType(): SpaceType
+  + isOccupied(): boolean
+  + getOccupiedBy(): String
+  + occupy(vehicleId: String): void
+  + vacate(): void
+}
+
+class Vehicle {
+  - id: String
+  - type: VehicleType
+  + Vehicle(id: String, type: VehicleType)
+  + getId(): String
+  + getType(): VehicleType
+  + equals(obj: Object): boolean
+  + hashCode(): int
+}
+
+class ParkingResult {
+  - success: boolean
+  - message: String
+  - allocatedSpaces: List<String>
+  - ParkingResult(success: boolean, message: String, allocatedSpaces: List<String>)
+  + {static} success(allocatedSpaces: List<String>): ParkingResult
+  + {static} success(allocatedSpace: String): ParkingResult
+  + {static} alreadyParked(existingSpaces: List<String>): ParkingResult
+  + {static} failure(reason: String): ParkingResult
+  + isSuccess(): boolean
+  + getMessage(): String
+  + getAllocatedSpaces(): List<String>
+}
+
+class LotStatus {
+  - totalSpaces: int
+  - totalCompactSpaces: int
+  - totalRegularSpaces: int
+  - availableSpaces: int
+  - availableCompactSpaces: int
+  - availableRegularSpaces: int
+  - occupiedSpaces: int
+  - occupiedCompactSpaces: int
+  - occupiedRegularSpaces: int
+  - vanOccupiedSpaces: int
+  - isFull: boolean
+  - isEmpty: boolean
+  - allCompactOccupied: boolean
+  - allRegularOccupied: boolean
+  + getTotalSpaces(): int
+  + getTotalCompactSpaces(): int
+  + getTotalRegularSpaces(): int
+  + getAvailableSpaces(): int
+  + getOccupiedSpaces(): int
+  + getVanOccupiedSpaces(): int
+  + isFull(): boolean
+  + isEmpty(): boolean
+  + isAllCompactOccupied(): boolean
+  + isAllRegularOccupied(): boolean
+}
+
+' Strategy Pattern
+interface ParkingStrategy {
+  + allocateSpaces(vehicleId: String, rows: List<List<ParkingSpace>>): ParkingResult
+}
+
+class MotorcycleParkingStrategy implements ParkingStrategy {
+  + allocateSpaces(vehicleId: String, rows: List<List<ParkingSpace>>): ParkingResult
+}
+
+class CarParkingStrategy implements ParkingStrategy {
+  + allocateSpaces(vehicleId: String, rows: List<List<ParkingSpace>>): ParkingResult
+}
+
+class VanParkingStrategy implements ParkingStrategy {
+  + allocateSpaces(vehicleId: String, rows: List<List<ParkingSpace>>): ParkingResult
+}
+
+class ParkingStrategyFactory {
+  - {static} strategies: Map<VehicleType, ParkingStrategy>
+  + {static} getStrategy(vehicleType: VehicleType): ParkingStrategy
+  + {static} registerStrategy(vehicleType: VehicleType, strategy: ParkingStrategy): void
+}
+
+' Enums
+enum SpaceType {
+  COMPACT
+  REGULAR
+}
+
+enum VehicleType {
+  MOTORCYCLE
+  CAR
+  VAN
+}
+
+' Application Entry Point
+class App {
+  + {static} main(args: String[]): void
+  - {static} demonstrateParkingOperation(parkingLot: ParkingLot, vehicleId: String, vehicleType: VehicleType): void
+  - {static} printStatus(parkingLot: ParkingLot): void
+}
+
+' Relationships
+ParkingLot "1" *-- "many" ParkingSpace : contains
+ParkingLot --> ParkingStrategy : uses
+ParkingLot --> ParkingResult : returns
+ParkingLot --> LotStatus : returns
+ParkingSpace --> SpaceType : has
+Vehicle --> VehicleType : has
+ParkingStrategyFactory --> ParkingStrategy : creates
+App --> ParkingLot : uses
+App --> VehicleType : uses
+
+@enduml

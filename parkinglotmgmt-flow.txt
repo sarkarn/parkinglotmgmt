@@ -1,0 +1,65 @@
+@startuml
+title Parking Lot Management System - Activity Diagram
+
+start
+
+:Input Vehicle ID and Type;
+
+if (Validate Input?) then (invalid)
+  :Return Failure Message;
+  stop
+else (valid)
+endif
+
+if (Vehicle Already Parked?) then (yes)
+  :Retrieve Existing Spaces;
+  :Return Existing Allocation;
+  stop
+else (no)
+endif
+
+:Get Parking Strategy from Factory;
+
+note right
+  Strategy Pattern:
+  MOTORCYCLE → MotorcycleParkingStrategy
+  CAR → CarParkingStrategy  
+  VAN → VanParkingStrategy
+end note
+
+if (Vehicle Type == MOTORCYCLE?) then (yes)
+  :Find any available space
+  (compact preferred);
+elseif (Vehicle Type == CAR?) then (yes)
+  :Find available space
+  (compact preferred, then regular);
+else (VAN)
+  :Find 3 consecutive spaces
+  (regular preferred);
+endif
+
+:Execute Allocation Strategy;
+
+if (Suitable Spaces Available?) then (no)
+  :Create Failure Result;
+  :Return Failure Message;
+  stop
+else (yes)
+endif
+
+:Allocate Selected Spaces;
+
+fork
+  :Occupy Spaces;
+fork again
+  :Update Vehicle-to-Spaces Map;
+fork again
+  :Update Space-to-Vehicle Map;
+end fork
+
+:Create Success Result;
+:Return Success with Space IDs;
+
+stop
+
+@enduml

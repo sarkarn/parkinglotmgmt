@@ -1,0 +1,77 @@
+@startuml
+title Parking Lot Management System - Use Case Diagram
+
+left to right direction
+
+' Actors
+actor "Vehicle Owner" as VehicleOwner
+actor "Parking Lot Manager" as ParkingLotManager
+actor "System Administrator" as SystemAdmin
+
+rectangle "Parking Lot Management System" {
+  
+  ' Main Use Cases
+  usecase "Park Vehicle" as ParkVehicle
+  usecase "Remove Vehicle" as RemoveVehicle
+  usecase "Check Lot Status" as CheckStatus
+  usecase "View Vehicle Location" as ViewLocation
+  usecase "Initialize Lot" as InitializeLot
+  
+  ' Extended Use Cases
+  usecase "Handle Motorcycle Parking" as MotorcycleParking
+  usecase "Handle Car Parking" as CarParking
+  usecase "Handle Van Parking" as VanParking
+  
+  ' Included Use Cases
+  usecase "Manage Space Allocation" as ManageAllocation
+  usecase "Validate Vehicle Info" as ValidateInfo
+  usecase "Update Space Status" as UpdateStatus
+  
+  ' Relationships - Actor to Use Cases
+  VehicleOwner --> ParkVehicle
+  VehicleOwner --> RemoveVehicle
+  VehicleOwner --> ViewLocation
+  
+  ParkingLotManager --> ParkVehicle
+  ParkingLotManager --> RemoveVehicle
+  ParkingLotManager --> CheckStatus
+  ParkingLotManager --> ViewLocation
+  
+  SystemAdmin --> InitializeLot
+  SystemAdmin --> CheckStatus
+  
+  ' Extension Relationships
+  MotorcycleParking .> ParkVehicle : <<extend>>
+  CarParking .> ParkVehicle : <<extend>>
+  VanParking .> ParkVehicle : <<extend>>
+  
+  ' Include Relationships
+  ParkVehicle .> ManageAllocation : <<include>>
+  ParkVehicle .> ValidateInfo : <<include>>
+  ParkVehicle .> UpdateStatus : <<include>>
+  RemoveVehicle .> ValidateInfo : <<include>>
+  RemoveVehicle .> UpdateStatus : <<include>>
+  
+}
+
+note right of MotorcycleParking
+  Allocates single space
+  (compact preferred)
+end note
+
+note right of CarParking
+  Allocates single space
+  (compact preferred, then regular)
+end note
+
+note right of VanParking
+  Allocates 3 consecutive
+  spaces (regular preferred)
+end note
+
+note bottom of ManageAllocation
+  Uses Strategy Pattern for
+  vehicle-specific allocation
+end note
+
+@enduml
