@@ -1,8 +1,26 @@
 # Parking Lot Management System
 
-A comprehensive object-oriented parking lot management system built with Java 17 and Maven. This system handles different vehicle types (motorcycles, cars, vans) with specific parking constraints and provides detailed status reporting.
+A comprehensive object-oriented parking lot management system built with Java 17 and Maven. This system handles different vehicle types (motorcycles, cars, vans) with specific parking constraints, provides detailed status reporting, and supports both single-level and **multi-level parking structures with elevator management**.
+
+## ✨ New Multi-Level Features
+
+The system now supports **multi-level parking lots** with sophisticated elevator management:
+
+- **🏢 Multi-Level Architecture**: Support for underground, ground, and elevated levels with different characteristics
+- **🛗 Intelligent Elevator System**: Automated elevator request and optimization for cross-level vehicle movement
+- **🎯 Level-Based Allocation**: Smart allocation considering level type preferences, vehicle restrictions, and occupancy
+- **🚗 Vehicle Access Control**: Level-specific vehicle type restrictions (e.g., vans restricted to ground level)
+- **📊 Enhanced Monitoring**: Comprehensive status reporting across all levels and elevator systems
+- **⚙️ Maintenance Mode**: Elevator maintenance management with automatic request reassignment
+
+### Quick Multi-Level Demo
+```bash
+# Run the multi-level parking demonstration
+mvn exec:java -Dexec.mainClass="com.example.parkinglot.multilevel.MultiLevelParkingDemo"
+```
 
 ## Table of Contents
+- [Multi-Level Features](#new-multi-level-features)
 - [Setup Instructions](#setup-instructions)
 - [Architecture Overview](#architecture-overview)
 - [Design and Architecture](#design-and-architecture)
@@ -166,13 +184,13 @@ Format: `"R{row}-{space}"` (e.g., "R1-1", "R2-3")
 
 ### Explicit Requirements Interpretations
 
-1. **Van Parking**: "Vans require two contiguous spaces"
-   - **Assumption**: Both spaces must be in the same row
-   - **Reasoning**: Real-world parking lots don't span vehicles across rows
+1. **Van Parking**: "Vans require two contiguous regular spaces"
+   - **Assumption**: Both spaces must be in the same row and be regular
+   - **Reasoning**: Real-world parking lots don't span vehicles across rows; vans don't fit compact spaces
 
-2. **Car Parking**: "Cars can only park in regular spaces"
-   - **Assumption**: Cars cannot use compact spaces under any circumstances
-   - **Reasoning**: Physical constraint based on vehicle size
+2. **Car Parking**: "Cars can park in regular or compact spaces"
+   - **Assumption**: Cars may use compact spaces when available
+   - **Reasoning**: Improves utilization; many modern cars fit compact spots
 
 3. **Motorcycle Parking**: "Motorcycles can park anywhere"
    - **Assumption**: Motorcycles prefer compact spaces when available
@@ -237,9 +255,9 @@ Format: `"R{row}-{space}"` (e.g., "R1-1", "R2-3")
 ### Immediate Extensions (Next Sprint)
 
 #### High Priority
-1. **Van Space Correction**: 
-   - Current implementation uses 2 spaces, requirement mentions 3
-   - Easy fix in `VanParkingStrategy`
+1. **Configurable Van Length**:
+   - Make number of contiguous spaces for vans configurable (2 by default)
+   - Extend `VanParkingStrategy` to respect configuration per lot/level
 
 2. **Input Validation Enhancement**:
    - Add vehicle ID format validation
@@ -359,18 +377,36 @@ parking-lot-management/
 │   │               └── parkinglot/
 │   │                   ├── App.java              # Demo application
 │   │                   ├── ParkingLot.java       # Core parking lot logic
+│   │                   ├── multilevel/           # Multi-level parking system ⭐ NEW
+│   │                   │   ├── MultiLevelParkingLot.java     # Multi-level orchestrator
+│   │                   │   ├── ParkingLevel.java             # Individual level logic
+│   │                   │   ├── LevelType.java                # Level classification
+│   │                   │   ├── Elevator.java                 # Elevator model
+│   │                   │   ├── ElevatorManager.java          # Elevator coordination
+│   │                   │   ├── ElevatorRequest.java          # Elevator request entity
+│   │                   │   ├── MultiLevelParkingResult.java  # Multi-level operation result
+│   │                   │   ├── MultiLevelLotStatus.java      # Overall multi-level status
+│   │                   │   └── VehicleLocation.java          # Vehicle location lookup
+│   │                   ├── demo/
+│   │                   │   └── ReservationSystemDemo.java # Reservation demo
 │   │                   ├── model/
 │   │                   │   ├── SpaceType.java    # Parking space types enum
 │   │                   │   ├── VehicleType.java  # Vehicle types enum
 │   │                   │   ├── ParkingSpace.java # Individual parking space
 │   │                   │   ├── Vehicle.java      # Vehicle representation
 │   │                   │   ├── ParkingResult.java # Operation result wrapper
-│   │                   │   └── LotStatus.java    # Status reporting class
+│   │                   │   ├── LotStatus.java    # Status reporting class
+│   │                   │   └── ParkingReservation.java # Reservation model ⭐ NEW
+│   │                   ├── reservation/          # ⭐ NEW PACKAGE
+│   │                   │   ├── ReservationManager.java    # Main reservation logic
+│   │                   │   ├── ReservationPolicy.java     # Booking policies
+│   │                   │   ├── ReservationResult.java     # Reservation results
+│   │                   │   └── ReservationStatus.java     # Status enumeration
 │   │                   └── strategy/
 │   │                       ├── ParkingStrategy.java           # Strategy interface
 │   │                       ├── MotorcycleParkingStrategy.java # Motorcycle allocation
-│   │                       ├── CarParkingStrategy.java        # Car allocation
-│   │                       ├── VanParkingStrategy.java        # Van allocation
+│   │                       ├── CarParkingStrategy.java        # Car allocation (regular or compact) ⭐ UPDATED
+│   │                       ├── VanParkingStrategy.java        # Van allocation (two contiguous regular) ⭐ UPDATED
 │   │                       └── ParkingStrategyFactory.java    # Strategy factory
 │   └── test/
 │       └── java/
@@ -379,6 +415,10 @@ parking-lot-management/
 │                   └── parkinglot/
 │                       ├── AppTest.java                       # Model unit tests
 │                       ├── ParkingLotTest.java               # Core functionality tests
+│                       ├── multilevel/                       # Multi-level tests ⭐ NEW
+│                       │   └── MultiLevelParkingLotTest.java # Multi-level system tests
+│                       ├── reservation/                      # ⭐ NEW TESTS
+│                       │   └── ReservationManagerTest.java   # Reservation system tests
 │                       └── strategy/
 │                           └── ParkingStrategyTest.java      # Strategy pattern tests
 ├── pom.xml
@@ -404,6 +444,12 @@ To run the comprehensive test suite:
 
 ```bash
 mvn test
+```
+
+To run only the multi-level parking tests:
+
+```bash
+mvn test -Dtest=MultiLevelParkingLotTest
 ```
 
 ## Running the Application
@@ -689,6 +735,7 @@ The architecture supports future enhancements:
 
 ## Features
 
+### Core Parking Management
 - **Multi-vehicle support**: Motorcycles, cars, and vans with different parking rules
 - **Flexible lot configuration**: Support for compact and regular spaces arranged in rows
 - **Strategy Pattern implementation**: Extensible vehicle allocation strategies
@@ -698,11 +745,128 @@ The architecture supports future enhancements:
 - **Robust testing**: 40+ comprehensive unit and integration tests
 - **Clean architecture**: Separation of concerns with clear domain boundaries
 
+### Advanced Reservation System ⭐ **NEW**
+- **Time-based Space Allocation**: Reserve parking spaces for specific time periods
+- **Priority Queue Management**: VIP, disabled, and regular customer prioritization
+- **Automatic Expiration Handling**: Background cleanup of expired reservations with 15-minute grace period
+- **Waitlist Processing**: Automatic allocation when spaces become available
+- **Concurrent Support**: Thread-safe operations with scheduled background tasks
+- **Policy-based Validation**: Configurable duration limits (30 min - 24 hours) and advance booking
+- **Customer Types**: Support for regular, VIP (priority 1), and disabled (priority 2) customers
+- **Real-time Notifications**: System notifications for reservation status changes
+
+### Multi-Level Parking System 🏢 **LATEST**
+- **Multi-Story Architecture**: Support for underground, ground, and elevated parking levels
+- **Intelligent Level Selection**: Automated optimal level allocation based on vehicle type and level characteristics
+- **Elevator Management System**: Comprehensive elevator coordination with request queuing and optimization
+- **Level-Specific Restrictions**: Vehicle access control per level (e.g., vans restricted to ground level)
+- **Smart Elevator Routing**: Multiple elevator support with capacity management and maintenance mode
+- **Priority-Based Allocation**: Level preferences considering convenience, security, and accessibility
+- **Cross-Level Operations**: Seamless vehicle parking and retrieval across multiple levels
+- **Enhanced Status Monitoring**: Real-time tracking of all levels, elevators, and system performance
+- **Elevator Request Management**: Queue management, urgent requests, and automatic reassignment during maintenance
+
 ### Parking Rules
 
 1. **Motorcycles**: Can park in any available space (compact preferred for efficiency)
-2. **Cars**: Can only park in regular spaces (size constraint)
-3. **Vans**: Require three contiguous regular spaces in the same row
+2. **Cars**: Can park in regular or compact spaces
+3. **Vans**: Require two contiguous regular spaces in the same row
+
+### Reservation System Usage ⭐
+
+```java
+// Initialize reservation system
+ParkingLot parkingLot = new ParkingLot(rowConfigurations);
+ReservationPolicy policy = new ReservationPolicy(); // Default: 30min-24hr, 30 days advance
+ReservationManager manager = new ReservationManager(parkingLot, policy);
+
+// Create reservations
+LocalDateTime startTime = LocalDateTime.now().plusHours(1);
+LocalDateTime endTime = startTime.plusHours(2);
+
+// Regular customer reservation
+ReservationResult result = manager.createReservation(
+    "CAR123", VehicleType.CAR, startTime, endTime, "REGULAR");
+
+// VIP customer reservation (highest priority)
+ReservationResult vipResult = manager.createReservation(
+    "VIP456", VehicleType.CAR, startTime, endTime, "VIP");
+
+// Disabled customer reservation (accessibility features)
+ReservationResult disabledResult = manager.createReservation(
+    "DIS789", VehicleType.CAR, startTime, endTime, "DISABLED");
+
+// Check results
+if (result.isSuccess()) {
+    System.out.println("Reservation confirmed: " + result.getReservation().getReservationId());
+} else if (result.getType() == ReservationResultType.WAITLISTED) {
+    System.out.println("Added to waitlist, position: " + result.getMessage());
+}
+
+// Monitor reservations
+List<ParkingReservation> upcoming = manager.getUpcomingReservations();
+int waitlistSize = manager.getWaitlistSize(VehicleType.CAR);
+```
+
+### Multi-Level Parking System Usage 🏢
+
+```java
+// Initialize multi-level parking lot
+MultiLevelParkingLot multiLevelLot = new MultiLevelParkingLot("DOWNTOWN-PLAZA");
+
+// Configure parking levels
+List<SpaceType[]> groundConfig = Arrays.asList(
+    new SpaceType[]{SpaceType.REGULAR, SpaceType.REGULAR, SpaceType.COMPACT}
+);
+ParkingLevel groundLevel = new ParkingLevel(
+    0, "Ground Level", LevelType.GROUND, groundConfig, 
+    true, true, Set.of(VehicleType.MOTORCYCLE, VehicleType.CAR, VehicleType.VAN)
+);
+multiLevelLot.addLevel(groundLevel);
+
+// Add elevated level for cars and motorcycles
+List<SpaceType[]> elevatedConfig = Arrays.asList(
+    new SpaceType[]{SpaceType.REGULAR, SpaceType.COMPACT}
+);
+ParkingLevel elevatedLevel = new ParkingLevel(
+    1, "Level 1", LevelType.ELEVATED, elevatedConfig,
+    true, false, Set.of(VehicleType.MOTORCYCLE, VehicleType.CAR)
+);
+multiLevelLot.addLevel(elevatedLevel);
+
+// Configure elevator system
+Elevator mainElevator = new Elevator("MAIN-01", Arrays.asList(0, 1), 3, true, 0);
+multiLevelLot.addElevator(mainElevator);
+
+// Park vehicles with automatic level selection and elevator coordination
+Vehicle car = new Vehicle("CAR-001", VehicleType.CAR);
+MultiLevelParkingResult result = multiLevelLot.parkVehicle(car);
+
+if (result.isSuccessful()) {
+    System.out.println("Vehicle parked on: " + result.getLevelName());
+    System.out.println("Assigned spaces: " + result.getAssignedSpaces());
+    
+    if (result.requiresElevator()) {
+        System.out.println("Elevator requested: " + result.getElevatorRequestId());
+    }
+}
+
+// Find vehicle location
+Optional<VehicleLocation> location = multiLevelLot.findVehicleLocation("CAR-001");
+if (location.isPresent()) {
+    System.out.println("Vehicle found at: " + location.get());
+}
+
+// Get comprehensive system status
+MultiLevelLotStatus status = multiLevelLot.getLotStatus();
+System.out.println("Overall occupancy: " + (status.getOverallOccupancyRate() * 100) + "%");
+System.out.println("Elevator system operational: " + status.isElevatorSystemOperational());
+
+// Monitor individual levels
+for (LevelStatus levelStatus : status.getLevelStatuses()) {
+    System.out.println(levelStatus);
+}
+```
 
 ---
 

@@ -15,6 +15,7 @@ public class MotorcycleParkingStrategy implements ParkingStrategy {
         for (List<ParkingSpace> row : rows) {
             for (ParkingSpace space : row) {
                 if (!space.isOccupied()) {
+                    space.occupy(vehicleId);
                     return ParkingResult.success(space.getIdentifier());
                 }
             }

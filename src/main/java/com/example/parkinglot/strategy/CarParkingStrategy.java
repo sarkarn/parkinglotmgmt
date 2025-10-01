@@ -11,14 +11,16 @@ public class CarParkingStrategy implements ParkingStrategy {
     
     @Override
     public ParkingResult allocateSpaces(String vehicleId, List<List<ParkingSpace>> rows) {
-        // Cars can only park in regular spaces
+        // Cars can park in both regular and compact spaces
         for (List<ParkingSpace> row : rows) {
             for (ParkingSpace space : row) {
-                if (!space.isOccupied() && space.getType() == SpaceType.REGULAR) {
+                if (!space.isOccupied() && 
+                    (space.getType() == SpaceType.REGULAR || space.getType() == SpaceType.COMPACT)) {
+                    space.occupy(vehicleId);
                     return ParkingResult.success(space.getIdentifier());
                 }
             }
         }
-        return ParkingResult.failure("No available regular space for car");
+        return ParkingResult.failure("No available space for car");
     }
 }

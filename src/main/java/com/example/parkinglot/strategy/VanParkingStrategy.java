@@ -20,6 +20,8 @@ public class VanParkingStrategy implements ParkingStrategy {
                 if (!space1.isOccupied() && !space2.isOccupied() &&
                     space1.getType() == SpaceType.REGULAR && space2.getType() == SpaceType.REGULAR) {
                     
+                    space1.occupy(vehicleId);
+                    space2.occupy(vehicleId);
                     return ParkingResult.success(List.of(space1.getIdentifier(), space2.getIdentifier()));
                 }
             }
